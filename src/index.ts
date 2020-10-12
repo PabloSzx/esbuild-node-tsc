@@ -10,20 +10,12 @@ import { Config, readUserConfig } from "./config";
 const cwd = process.cwd();
 
 function getTSConfig() {
-  const tsConfigFile = ts.findConfigFile(
-    cwd,
-    ts.sys.fileExists,
-    "tsconfig.json"
-  );
+  const tsConfigFile = ts.findConfigFile(cwd, ts.sys.fileExists, "tsconfig.json");
   if (!tsConfigFile) {
     throw new Error(`tsconfig.json not found in the current directory! ${cwd}`);
   }
   const configFile = ts.readConfigFile(tsConfigFile, ts.sys.readFile);
-  const tsConfig = ts.parseJsonConfigFileContent(
-    configFile.config,
-    ts.sys,
-    cwd
-  );
+  const tsConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, cwd);
   return { tsConfig, tsConfigFile };
 }
 
@@ -39,15 +31,12 @@ function esBuildSourceMapOptions(tsConfig: TSConfig) {
 function getBuildMetadata(userConfig: Config) {
   const { tsConfig, tsConfigFile } = getTSConfig();
 
-  const outDir = tsConfig.options.outDir || userConfig.outDir || "dist";
+  const outDir = userConfig.outDir || tsConfig.options.outDir || "dist";
 
   const esbuildEntryPoints = userConfig.esbuild?.entryPoints || [];
   const srcFiles = [...tsConfig.fileNames, ...esbuildEntryPoints];
   const sourcemap = esBuildSourceMapOptions(tsConfig);
-  const target =
-    userConfig.esbuild?.target ||
-    tsConfig?.raw?.compilerOptions?.target ||
-    "es6";
+  const target = userConfig.esbuild?.target || tsConfig?.raw?.compilerOptions?.target || "es6";
 
   const minify = userConfig.esbuild?.minify || false;
 
@@ -82,11 +71,7 @@ async function buildSourceFiles(esbuildOptions: Partial<BuildOptions>) {
 
 type AssetsOptions = { baseDir: string; outDir: string; patterns: string[] };
 
-async function copyNonSourceFiles({
-  baseDir,
-  outDir,
-  patterns,
-}: AssetsOptions) {
+async function copyNonSourceFiles({ baseDir, outDir, patterns }: AssetsOptions) {
   const relativeOutDir = path.relative(baseDir, outDir);
   return await cpy(patterns, relativeOutDir, {
     cwd: baseDir,
@@ -101,10 +86,7 @@ async function main() {
 
   rimraf.sync(outDir);
 
-  await Promise.all([
-    buildSourceFiles(esbuildOptions),
-    copyNonSourceFiles(assetsOptions),
-  ]);
+  await Promise.all([buildSourceFiles(esbuildOptions), copyNonSourceFiles(assetsOptions)]);
 }
 
 console.time("Built in");

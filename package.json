@@ -1,5 +1,5 @@
 {
-  "name": "esbuild-node-tsc",
+  "name": "@pablosz/esbuild-node-tsc",
   "description": "Build your Typescript Node.js projects using blazing fast esbuild",
   "version": "1.0.2",
   "main": "./dist/index.js",
@@ -9,6 +9,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "prepare": "tsc",
     "build": "tsc"
   },
   "keywords": [
